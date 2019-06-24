@@ -1,8 +1,5 @@
 import edu.princeton.cs.algs4.Picture;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Class to provide methods to resize any given image while preserving the content of the picture
  */
@@ -85,30 +82,32 @@ public class SeamCarver {
             }
             rgbMatrix[i][y] = Integer.MAX_VALUE;
         }
-        rgbMatrix = removeHorizontal();
+        rgbMatrix = arrayCopy(rgbMatrix, false);
         updatePicture();
     }
 
     /**
-     * Method to create a new matrix by removing those pixels with Integer max_val
+     * Method to create a new matrix by removing pixels with Integer max_val
+     *
+     * @param array
+     * @param vertical
      */
-    private int[][] removeHorizontal() {
-        int[][] matrix = new int[width()][height() - 1];
-        List<List<Integer>> arrays = new ArrayList<>();
-
-        for (int x = 0; x < rgbMatrix.length; x++) {
-            List<Integer> col = new ArrayList<>();
-            for (int y = 0; y < rgbMatrix[0].length; y++) {
-                if (rgbMatrix[x][y] == Integer.MAX_VALUE) { continue; }
-                col.add(rgbMatrix[x][y]);
-            }
-            arrays.add(col);
-        }
-
-        for (int x = 0; x < arrays.size(); x++) {
-            List<Integer> col = arrays.get(x);
-            for (int y = 0; y < col.size(); y++) {
-                matrix[x][y] = col.get(y);
+    private int[][] arrayCopy(int[][] array, boolean vertical) {
+        int[][] matrix =
+                vertical ? new int[array.length - 1][array[0].length] : new int[array.length][array[0].length - 1];
+        boolean[][] marked = new boolean[array.length][array[0].length];
+        for (int x = 0; x < matrix.length; x++) {
+            for (int y = 0; y < matrix[0].length; y++) {
+                if (!marked[x][y] && array[x][y] != Integer.MAX_VALUE) {
+                    matrix[x][y] = array[x][y];
+                } else if (vertical) {
+                    matrix[x][y] = array[x + 1][y];
+                    marked[x + 1][y] = true;
+                } else {
+                    matrix[x][y] = array[x][y + 1];
+                    marked[x][y + 1] = true;
+                }
+                marked[x][y] = true;
             }
         }
         return matrix;
@@ -159,33 +158,8 @@ public class SeamCarver {
             }
             rgbMatrix[x][i] = Integer.MAX_VALUE;
         }
-        rgbMatrix = removeVertical();
+        rgbMatrix = arrayCopy(rgbMatrix, true);
         updatePicture();
-    }
-
-    /**
-     * Method to create a new matrix by removing those pixels with Integer max_val
-     */
-    private int[][] removeVertical() {
-        int[][] matrix = new int[width() - 1][height()];
-        List<List<Integer>> arrays = new ArrayList<>();
-
-        for (int y = 0; y < rgbMatrix[0].length; y++) {
-            List<Integer> row = new ArrayList<>();
-            for (int x = 0; x < rgbMatrix.length; x++) {
-                if (rgbMatrix[x][y] == Integer.MAX_VALUE) { continue; }
-                row.add(rgbMatrix[x][y]);
-            }
-            arrays.add(row);
-        }
-
-        for (int y = 0; y < arrays.size(); y++) {
-            List<Integer> row = arrays.get(y);
-            for (int x = 0; x < row.size(); x++) {
-                matrix[x][y] = row.get(x);
-            }
-        }
-        return matrix;
     }
 
     /**
